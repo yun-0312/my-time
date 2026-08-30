@@ -26,16 +26,14 @@ export default function LoginPage() {
             if (result?.error) {
                 toast.error(result.error);
                 setIsLoading(false);
+            }
+
+        } catch (error) {
+            if ((error as Error).message === "NEXT_REDIRECT") {
+                toast.success("ログインしました!");
                 return;
             }
 
-            if (result?.success) {
-                toast.success("ログインしました！");
-                setTimeout(() => {
-                    router.push("/dashboard");
-                }, 500);
-            }
-        } catch (error) {
             console.error(error);
             toast.error("予期せぬエラーが発生しました。");
             setIsLoading(false);

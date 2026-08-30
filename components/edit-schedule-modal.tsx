@@ -1,14 +1,17 @@
 "use client";
 
-import React, { useEffect, useState, useTransition } from "react";
+import React, { useEffect, useState, useTransition, useCallback } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
-import { Trash2 } from "lucide-react";
+import { Trash2, CheckSquare } from "lucide-react";
 import { updateSchedule, deleteSchedule } from "@/app/actions/schedule-actions";
-import type { Profile, Schedule } from "@/types/dashboard";
+import { getTasksByScheduleId } from "@/app/actions/task-actions";
+import type { Profile, Schedule, Task } from "@/types/dashboard";
 import { toast } from "sonner";
 import { formatForDatetimeLocal } from "@/utils/format";
+import { TodoList } from "./todo-list";
 
 
 interface EditScheduleModalProps {
@@ -16,6 +19,8 @@ interface EditScheduleModalProps {
     members: Profile[];
     isOpen: boolean;
     onClose: () => void;
+    tasks?: Task[];
+    currentUserId: string;
 }
 
 export function EditScheduleModal({
@@ -23,6 +28,8 @@ export function EditScheduleModal({
     members,
     isOpen,
     onClose,
+    tasks = [],
+    currentUserId,
 }: EditScheduleModalProps) {
     const [isPending, startTransition] = useTransition();
 
@@ -31,13 +38,35 @@ export function EditScheduleModal({
     const [endAt, setEndAt] = useState("");
     const [targetUserId, setTargetUserId] = useState("");
 
-    useEffect(() => {
-        if (schedule) {
-            setTitle(schedule.title || "");
-            setStartAt(formatForDatetimeLocal(schedule.start_at));
-            setEndAt(formatForDatetimeLocal(schedule?.end_at));
-            setTargetUserId(schedule.target_user_id || "");
+    const [scheduleTasks, setScheduleTasks] = useState<Task[]>([]);
+
+    const fetchScheduleTasks = useCallback(async () => {
+        if (!schedule) return;
+        try {
+            const tasksData = await getTasksByScheduleId(schedule.id);
+            setScheduleTasks(tasksData);
+        } catch (error) {
+            console.error("タスクの取得に失敗しました", error);
         }
+    }, [schedule]);
+
+    useEffect(() => {
+        if (!schedule) return;
+
+        setTitle(schedule.title || "");
+        setStartAt(formatForDatetimeLocal(schedule.start_at));
+        setEndAt(formatForDatetimeLocal(schedule?.end_at));
+        setTargetUserId(schedule.target_user_id || "");
+
+        async function fetchScheduleTasks() {
+            try {
+                const tasksData = await getTasksByScheduleId(schedule!.id);
+                setScheduleTasks(tasksData);
+            } catch (error) {
+                console.error("タスクの取得に失敗しました", error);
+            }
+        }
+        fetchScheduleTasks();
     }, [schedule])
 
     if (!isOpen || !schedule) return null;
@@ -81,16 +110,15 @@ export function EditScheduleModal({
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
-                <div className="mb-4 flex items-center justify-between">
-                    <h2 className="font-display text-xl font-bold text-ink">予定の編集・削除</h2>
-                    <Button variant="ghost" size="sm" onClick={onClose}>
-                        ✕
-                    </Button>
-                </div>
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="sm:max-w-lg bg-white max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle className="font-display text-lg font-bold text-ink">
+                        予定の詳細と準備タスク
+                    </DialogTitle>
+                </DialogHeader>
 
-                <form onSubmit={handleUpdate} className="flex flex-col gap-4">
+                <form onSubmit={handleUpdate} className="flex flex-col gap-4 py-2">
                     {/*タイトル*/}
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-medium text-ink/70">タイトル</label>
@@ -149,13 +177,13 @@ export function EditScheduleModal({
                     </div>
 
                     {/*ボタン類*/}
-                    <div className="mt-4 flex items-center justify-between">
+                    <div className="flex justify-between items-center pt-2">
                         <Button
                             type="button"
-                            variant="destructive"
+                            variant="ghost"
                             disabled={isPending}
                             onClick={handleDelete}
-                            className="bg-coral/10 text-coral hover:bg-coral/20"
+                            className="text-coral hover:bg-coral/10 hover:text-coral"
                         >
                             <Trash2 className="mr-1 h-4 w-4" />
                             削除
@@ -171,7 +199,26 @@ export function EditScheduleModal({
                         </div>
                     </div>
                 </form>
-            </div>
-        </div>
+
+                {/* 紐づく準備タスクセクション */}
+                <div className="mt-4 border-t border-ink/10 pt-4">
+                    <h3 className="flex items-center gap2 font-display text-sm font-bold text-ink mb-3">
+                        <CheckSquare className="h-4 w-4 text-mint" />
+                        <span>この予定の準備・やること</span>
+                    </h3>
+
+                    <TodoList
+                        familyId={schedule.family_id}
+                        members={members}
+                        initialTasks={scheduleTasks}
+                        currentUserId={schedule.target_user_id || currentUserId}
+                        scheduleId={schedule.id}
+                        hideHeader={true}
+                        defaultDueAt={schedule.start_at}
+                        onTaskChanged={fetchScheduleTasks}
+                    />
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 }

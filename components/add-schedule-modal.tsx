@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/u
 import { createSchedule } from "@/app/actions/schedule-actions";
 import type { Profile } from "@/types/dashboard";
 import { toast } from "sonner";
+import { formatForDatetimeLocal } from "@/utils/format";
 
 interface AddScheduleModalProps {
     isOpen: boolean;
@@ -32,8 +33,10 @@ export function AddScheduleModal({
 
     useEffect(() => {
         if (initialDate) {
-            setStartAt(initialDate);
-            const [datePart, timePart] = initialDate.split("T");
+            const formattedStart = formatForDatetimeLocal(initialDate);
+            setStartAt(formattedStart);
+
+            const [datePart, timePart] = formattedStart.split("T");
             if (timePart) {
                 const [hours, minutes] = timePart.split(":");
                 const nextHour = String(Number(hours) + 1).padStart(2, "0");
@@ -47,7 +50,21 @@ export function AddScheduleModal({
     const selectedMember = members.find((m) => m.id === assignedTo);
 
     function handleSubmit(formData: FormData) {
+        const startValue = formData.get("start_at") as string;
+        const endValue = formData.get("end_at") as string;
+
+        if (startValue && endValue) {
+            const startDate = new Date(startValue);
+            const endDate = new Date(endValue);
+
+            if (endDate <= startDate) {
+                toast.error("終了日時は開始日時より後の時間を指定してください！");
+                return;
+            }
+        }
+
         startTransition(async () => {
+
             try {
                 const result = await createSchedule(formData);
                 if (result?.success) {

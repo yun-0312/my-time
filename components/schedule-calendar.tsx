@@ -11,15 +11,18 @@ import type { Schedule, Profile } from "@/types/dashboard";
 import { AddScheduleModal } from "./add-schedule-modal";
 import { getHexColor } from "@/utils/thema";
 import { EditScheduleModal } from "./edit-schedule-modal";
+import type { Task } from "@/types/dashboard";
 
 
 interface ScheduleCalendarProps {
     familyId: string;
     members: Profile[];
     schedules: Schedule[];
+    tasks: Task[];
+    currentUserId: string;
 }
 
-export function ScheduleCalendar({ familyId, members, schedules }: ScheduleCalendarProps) {
+export function ScheduleCalendar({ familyId, members, schedules, tasks, currentUserId }: ScheduleCalendarProps) {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState("");
     const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
@@ -94,6 +97,8 @@ export function ScheduleCalendar({ familyId, members, schedules }: ScheduleCalen
                 members={members}
                 isOpen={selectedSchedule !== null}
                 onClose={() => setSelectedSchedule(null)}
+                tasks={tasks}
+                currentUserId={currentUserId}
             />
         </div>
     );

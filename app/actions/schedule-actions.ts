@@ -87,3 +87,31 @@ export async function deleteSchedule(scheduleId: string) {
     revalidateSchedulePaths();
     return { success: true };
 }
+
+export async function getNextSchedule(familyId: string, targetUserId?: string) {
+    const supabase = await createClient();
+    const nowIso = new Date().toISOString();
+
+    const threeHoursLater = new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString();
+
+    let query = supabase
+        .from("schedules")
+        .select("*")
+        .eq("family_id", familyId)
+        .gte("start_at", nowIso)
+        .lte("start_at", threeHoursLater)
+        .order("start_at", { ascending: true })
+        .limit(1);
+
+    if (targetUserId) {
+        query = query.or(`target_user_id.eq.${targetUserId},target_user_id.is.null`);
+    }
+
+    const { data, error } = await query.single();
+
+    if (error && error.code !== "PGRST116") {
+        console.error("次のスケジュールの取得に失敗しました:", error.message);
+    }
+
+    return data || null;
+}

@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { Header } from "@/components/layout/header";
 import { TodoList } from "@/components/todo-list";
+import { equal } from "assert";
 
-export default async function TasksPage() {
+export default async function ChildTasksPage() {
     const supabase = await createClient();
 
     const {
@@ -15,21 +16,14 @@ export default async function TasksPage() {
         redirect("/login");
     }
 
-    // 1. 自分のプロフィールを取得（family_id を知るために先に必要）
     const { data: currentProfile, error: profileError } = await supabase
         .from("profiles")
         .select('*')
         .eq("id", user.id)
         .single();
 
-    if (profileError || !currentProfile || !currentProfile?.family_id) {
-        // まだ家族グループを作成していないユーザー向けの導線
-        redirect("/setup-family");
-    }
-
     const familyId = currentProfile.family_id;
 
-    // 2. 家族の名前を取得
     const { data: familyData } = await supabase
         .from("families")
         .select("name")
@@ -38,7 +32,6 @@ export default async function TasksPage() {
 
     const familyName = familyData && familyData.length > 0 ? familyData[0].name : '我が家';
 
-    // 3. 家族一覧を取得
     const { data: familyMembers } = await supabase
         .from('profiles')
         .select('*')
@@ -46,23 +39,23 @@ export default async function TasksPage() {
         .order('role', { ascending: false })
         .order('created_at', { ascending: true });
 
-    //4. 家族のタスク一覧を取得
     const { data: tasks } = await supabase
         .from('tasks')
         .select('*')
         .eq('family_id', familyId)
-        .order('created_at', { ascending: false });
+        .or(`assigned_to.eq.${user.id},assigned_to.is.null`)
+        .order('created_at', { ascending: true });
 
     return (
         <div className="min-h-screen bg-sky font-body text-ink">
             <Header familyName={familyName} />
-            <div className="mx-auto max-w-5xl space-y-10 p-6 sm:p-10">
+            <div className="mx-auto max-w-5xl space-y-10 p-6 ms:p-10">
                 <main className="mx-auto max-w-5xl space-y-10 p-6 sm:p-10">
                     <p className="mb-1 font-mono text-xs uppercase tracking-[0.2em] text-mint">
-                        ファミリータスク一覧
+                        自分のタスク一覧
                     </p>
                     <h1 className="font-display text-3xl font-bold text-ink">
-                        タスク一覧
+                        やること一覧
                     </h1>
 
                     <TodoList
@@ -73,7 +66,6 @@ export default async function TasksPage() {
                         currentUserId={""}
                     />
                 </main>
-
             </div>
         </div>
     );

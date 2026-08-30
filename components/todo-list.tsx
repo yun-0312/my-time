@@ -29,9 +29,13 @@ interface TodoListProps {
     initialTasks: Task[];
     title?: string;
     currentUserId: string;
+    scheduleId?: string;
+    hideHeader?: boolean;
+    defaultDueAt?: string;
+    onTaskChanged?: () => void;
 }
 
-export function TodoList({ familyId, members, initialTasks, title= "タスク", currentUserId }: TodoListProps) {
+export function TodoList({ familyId, members, initialTasks, title= "タスク", currentUserId, scheduleId, hideHeader = false, defaultDueAt, onTaskChanged }: TodoListProps) {
     const [tasks, setTasks] = useState(initialTasks);
     const [optimisticTasks, setOptimisticDone] = useOptimistic(
         tasks,
@@ -53,7 +57,14 @@ export function TodoList({ familyId, members, initialTasks, title= "タスク", 
         [members],
     );
 
-    const visibleTasks = optimisticTasks.filter((t) => {
+    const targetTasks = useMemo(() => {
+        if (scheduleId !== undefined) {
+            return optimisticTasks.filter((t) => t.schedule_id === scheduleId);
+        }
+        return optimisticTasks;
+    }, [optimisticTasks, scheduleId]);
+
+    const visibleTasks = targetTasks.filter((t) => {
         if (filter === "open") return !t.is_completed;
         if (filter === "done") return t.is_completed;
         return true;
@@ -101,8 +112,12 @@ export function TodoList({ familyId, members, initialTasks, title= "タスク", 
         formData.append("title", quickTitle.trim());
         formData.append("family_id", familyId);
 
-        const { endOfTodayUTC } = getTodayJSTRange();
-        formData.append("due_at", endOfTodayUTC);
+        if (scheduleId !== undefined) {
+            formData.append("schedule_id", String(scheduleId));
+        }
+
+        const dueAtToUse = defaultDueAt || getTodayJSTRange().endOfTodayUTC;
+        formData.append("due_at", dueAtToUse);
 
         if (currentUserId) {
             formData.append("assigned_to", currentUserId);
@@ -114,6 +129,7 @@ export function TodoList({ familyId, members, initialTasks, title= "タスク", 
                 if (result?.success) {
                     setQuickTitle("");
                     toast.success("タスクを追加しました！");
+                    onTaskChanged?.();
                 }
             } catch (e) {
                 toast.error("タスクの追加に失敗しました。");
@@ -123,25 +139,27 @@ export function TodoList({ familyId, members, initialTasks, title= "タスク", 
 
     return (
         <section>
-            <div className="mb-4 flex items-center justify-between">
-                    <h2 className="flex items-center gap-2 font-display text-xl font-bold text-ink">                        <CheckSquare className="h-5 w-5 text-mint" />{title}
-                </h2>
-                <div className="flex gap-1 rounded-full bg-cloud p-1 text-xs">
-                {(["open", "done", "all"] as const).map((key) => (
-                    <button
-                    key={key}
-                    onClick={() => setFilter(key)}
-                    className={`rounded-full px-3 py-1 font-medium transition-colors ${
-                        filter === key
-                        ? "bg-sunshine text-ink"
-                        : "text-ink/50 hover:text-ink"
-                    }`}
-                    >
-                    {key === "open" ? "未完了" : key === "done" ? "完了" : "すべて"}
-                    </button>
-                ))}
+            {!hideHeader && (
+                <div className="mb-4 flex items-center justify-between">
+                    <h2 className="flex items-center gap-2 font-display text-xl font-bold text-ink">
+                        <CheckSquare className="h-5 w-5 text-mint" />{title}
+                    </h2>
+                    <div className="flex gap-1 rounded-full bg-cloud p-1 text-xs">
+                        {(["open", "done", "all"] as const).map((key) => (
+                            <button
+                                key={key}
+                                onClick={() => setFilter(key)}
+                                className={`rounded-full px-3 py-1 font-medium transition-colors ${filter === key
+                                        ? "bg-sunshine text-ink"
+                                        : "text-ink/50 hover:text-ink"
+                                    }`}
+                            >
+                                {key === "open" ? "未完了" : key === "done" ? "完了" : "すべて"}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* クイック入力 ＋ 詳しく追加ボタン */}
             <div className="mb-4 flex gap-2">

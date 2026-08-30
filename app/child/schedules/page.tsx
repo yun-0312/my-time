@@ -2,16 +2,22 @@ import { createClient } from "@/utils/supabase/server";
 import { Header } from "@/components/layout/header";
 import { ScheduleCalendar } from "@/components/schedule-calendar";
 import { getTasks } from "@/app/actions/task-actions";
+import { redirect } from "next/navigation";
 
-export default async function SchedulePage() {
+export default async function ChildSchedulePage() {
     const supabase = await createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect("/login");
+    }
+
     const { data: profile } = await supabase
-        .from("profiles")
-        .select("family_id, families(name)")
-        .eq("id", user?.id)
-        .single();
+    .from("profiles")
+    .select("family_id, families(name)")
+    .eq("id", user?.id)
+    .single();
 
     const familyId = profile?.family_id;
     // @ts-expect-error type safety check
@@ -20,7 +26,9 @@ export default async function SchedulePage() {
     const { data: schedules } = await supabase
         .from("schedules")
         .select("*")
-        .eq("family_id", familyId);
+        .eq("family_id", familyId)
+        .or(`target_user_id.eq.${user.id},target_user_id.is.null`)
+        .order('start_at', { ascending: true });
 
     const { data: members } = await supabase
         .from("profiles")
@@ -34,10 +42,9 @@ export default async function SchedulePage() {
             <Header familyName={familyName} />
             <main className="mx-auto max-w-5xl px-6 py-8">
                 <div className="mb-6 flex items-center justify-between">
-                    <h1 className="font-display text-2xl font-bold">スケジュール管理</h1>
+                    <h1 className="font-display text-2xl font-bold">スケジュールカレンダー</h1>
                 </div>
 
-                {/* カレンダーコンポーネントの呼び出し */}
                 <ScheduleCalendar
                     familyId={familyId}
                     members={members || []}
@@ -48,5 +55,5 @@ export default async function SchedulePage() {
             </main>
         </div>
     );
-}
 
+}

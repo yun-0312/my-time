@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/header";
 import { FamilyMemberList } from "@/components/dashboard/family-member-list";
 import { TodoList } from "@/components/todo-list";
 import { ScheduleList } from "@/components/dashboard/schedule-list";
+import { NextScheduleTimerWidget } from "@/components/next-schedule-timer-widget";
 import { getTodayJSTRange } from "@/utils/date";
 
 export default async function DashboardPage() {
@@ -80,6 +81,12 @@ export default async function DashboardPage() {
                     <h1 className="font-display text-3xl font-bold text-ink">
                         ダッシュボード
                     </h1>
+
+                    <NextScheduleTimerWidget
+                        familyId={familyId}
+                        currentUserId={user.id}
+                        isChildView={false}
+                    />
 
                     <FamilyMemberList
                         familyId={familyId}
