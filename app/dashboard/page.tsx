@@ -98,6 +98,7 @@ export default async function DashboardPage() {
                         familyId={familyId}
                         members={familyMembers || []}
                         initialSchedules={schedules || []}
+                        currentUserId={user.id}
                     />
 
                     <TodoList

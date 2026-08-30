@@ -93,6 +93,7 @@ export default async function ChildDashboardPage() {
                         familyId={profile.family_id}
                         members={familyMembers || []}
                         initialSchedules={schedules || []}
+                        currentUserId={user.id}
                     />
 
                     <TodoList
