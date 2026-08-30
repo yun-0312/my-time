@@ -18,9 +18,10 @@ interface ScheduleListProps {
     familyId: string;
     members: Profile[];
     initialSchedules: Schedule[];
+    currentUserId: string;
 }
 
-export function ScheduleList({ familyId, members, initialSchedules }: ScheduleListProps) {
+export function ScheduleList({ familyId, members, initialSchedules, currentUserId }: ScheduleListProps) {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [schedules, setSchedules] = useState(initialSchedules);
     const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
@@ -138,6 +139,7 @@ export function ScheduleList({ familyId, members, initialSchedules }: ScheduleLi
                 members={members}
                 isOpen={selectedSchedule !== null}
                 onClose={() => setSelectedSchedule(null)}
+                currentUserId={currentUserId}
             />
         </section>
     );
