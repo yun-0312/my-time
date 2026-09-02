@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { addFamilyMember } from "@/app/dashboard/actions";
+import { addFamilyMember } from "@/app/actions/member-actions";
 import { toast } from "sonner";
 
 const AVATAR_COLOR_OPTIONS = [
@@ -57,7 +57,7 @@ export function AddMemberDialog({
                 toast.success("家族を追加しました！")
             } catch (e) {
                 setError(
-                e instanceof Error ? e.message : "メンバーの追加に失敗しました。",
+                    e instanceof Error ? e.message : "メンバーの追加に失敗しました。",
                 );
             }
         });
