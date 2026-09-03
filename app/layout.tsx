@@ -50,6 +50,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased ${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable} bg-sky font-body text-ink antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <Header />
         {children}
         <Toaster position="top-right" richColors />
       </body>

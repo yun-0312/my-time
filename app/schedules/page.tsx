@@ -1,5 +1,4 @@
 import { createClient } from "@/utils/supabase/server";
-import { Header } from "@/components/layout/header";
 import { ScheduleCalendar } from "@/components/schedule-calendar";
 import { getTasks } from "@/app/actions/task-actions";
 
@@ -14,8 +13,6 @@ export default async function SchedulePage() {
         .single();
 
     const familyId = profile?.family_id;
-    // @ts-expect-error type safety check
-    const familyName = profile?.families?.name || "我が家";
 
     const { data: schedules } = await supabase
         .from("schedules")
@@ -31,7 +28,6 @@ export default async function SchedulePage() {
 
     return (
         <div className="min-h-screen bg-sky text-ink">
-            <Header familyName={familyName} />
             <main className="mx-auto max-w-5xl px-6 py-8">
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="font-display text-2xl font-bold">スケジュール管理</h1>
