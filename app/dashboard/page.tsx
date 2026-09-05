@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { FamilyMemberList } from "@/components/dashboard/family-member-list";
 import { TodoList } from "@/components/todo-list";
+import { RequestListWidget } from "@/components/request-list-widget";
 import { ScheduleList } from "@/components/dashboard/schedule-list";
 import { NextScheduleTimerWidget } from "@/components/next-schedule-timer-widget";
 import { getTodayJSTRange } from "@/utils/date";
@@ -67,6 +68,20 @@ export default async function DashboardPage() {
         .lte('start_at', endOfTodayUTC)
         .order('start_at', { ascending: true });
 
+    //6. リクエストの取得
+    const { data: request } = await supabase
+        .from('requests')
+        .select(`
+            id,
+            content,
+            status,
+            created_at,
+            requested_by_profile:profiles!requests_requested_by_fkey(full_name),
+            requested_to_profile:profiles!requests_requested_to_fkey(full_name)
+        `)
+        .eq('family_id', familyId)
+        .order('created_at', { ascending: false });
+
     return (
         <div className="min-h-screen bg-sky font-body text-ink">
             <div className="mx-auto max-w-5xl space-y-10 p-6 sm:p-10">
@@ -103,6 +118,10 @@ export default async function DashboardPage() {
                         initialTasks={tasks || []}
                         title="今日のタスク"
                         currentUserId={user.id}
+                    />
+
+                    <RequestListWidget
+                        requests={request || []}
                     />
                 </main>
 

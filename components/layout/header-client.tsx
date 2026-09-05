@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { CheckSquare, CalendarDays, Menu, LogOut } from "lucide-react";
+import { CheckSquare, CalendarDays, Menu, LogOut, Mail } from "lucide-react";
 import { useState } from "react";
 import { logout } from "@/app/logout/actions";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -61,12 +61,21 @@ export function HeaderClient({
                         <CalendarDays className="h-3.5 w-3.5" />
                         <span>スケジュール</span>
                     </Link>
+
                     <Link
                         href={tasksHref}
                         className="flex items-center gap-1.5 rounded-xl bg-mint/15 px-3.5 py-2 text-xs font-bold text-mint transition hover:bg-mint/25"
                     >
                         <CheckSquare className="h-3.5 w-3.5" />
                         <span>全てのタスク</span>
+                    </Link>
+
+                    <Link
+                        href="/requests"
+                        className="flex items-center gap-1.5 rounded-xl bg-lavender/15 px-3.5 py-2 text-xs font-bold text-lavender transition hover:bg-lavender/25"
+                    >
+                        <Mail className="h-3.5 w-3.5" />
+                        <span>リクエスト</span>
                     </Link>
 
                     <div className="flex items-center gap-2 rounded-2xl bg-sky/60 px-3.5 py-1.5 border border-ink/5">
@@ -146,6 +155,14 @@ export function HeaderClient({
                                     >
                                         <CheckSquare className="h-4 w-4" />
                                         <span>全てのタスク</span>
+                                    </Link>
+
+                                                                                                            <Link
+                                        href="/requests"
+                                        className="flex items-center gap-2.5 rounded-xl bg-lavender/15 px-4 py-3 text-sm font-bold text-lavender transition"
+                                    >
+                                        <Mail className="h-4 w-4" />
+                                        <span>リクエスト</span>
                                     </Link>
                                 </div>
                             </div>

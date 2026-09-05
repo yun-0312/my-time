@@ -2,9 +2,11 @@ import React from "react";
 import { NextScheduleTimerWidget } from "@/components/next-schedule-timer-widget";
 import { TodoList } from "@/components/todo-list";
 import { ScheduleList } from "@/components/dashboard/schedule-list";
+import { RequestForm } from "@/components/requests";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { getTodayJSTRange } from "@/utils/date";
+import { RequestHistoryList } from "@/components/request-history-list";
 
 export default async function ChildDashboardPage() {
     const supabase = await createClient();
@@ -17,6 +19,8 @@ export default async function ChildDashboardPage() {
     if (userError || !user) {
         redirect("/login");
     }
+
+    const userId = user.id;
 
     const { data: profile } = await supabase
         .from("profiles")
@@ -54,13 +58,31 @@ export default async function ChildDashboardPage() {
         .order('start_at', { ascending: true });
 
     // 今日のタスク一覧を取得
-    const { data: tasks, error } = await supabase
+    const { data: tasks } = await supabase
         .from('tasks')
         .select('*')
         .eq('family_id', profile.family_id)
         .or(`assigned_to.eq.${user.id},assigned_to.is.null`)
         .or(`and(due_at.gte.${startOfTodayUTC},due_at.lte.${endOfTodayUTC}),and(due_at.lt.${startOfTodayUTC},is_completed.eq.false),due_at.is.null`)
         .order('due_at', { ascending: true, nullsFirst: false });
+
+    // 自分が送ったリクエストの取得
+    const { data: myRequests } = await supabase
+        .from('requests')
+        .select(`
+            id,
+            content,
+            status,
+            created_at,
+            requested_by_profile:profiles!requests_requested_by_fkey(full_name),
+            requested_to_profile:profiles!requests_requested_to_fkey(full_name)
+        `)
+        .eq('family_id', profile.family_id)
+        .eq('requested_by', user.id)
+        .order('created_at', { ascending: false });
+
+    const pendingRequests = myRequests?.filter((req) => req.status === "pending") || [];
+
 
 
     return (
@@ -99,6 +121,12 @@ export default async function ChildDashboardPage() {
                         title="今日のタスク"
                         currentUserId={user.id}
                     />
+
+                    <RequestForm
+                        familyId={profile.family_id}
+                        members={familyMembers || []}
+                    />
+                    <RequestHistoryList requests={pendingRequests} />
                 </main>
             </div>
         </div>
