@@ -24,20 +24,18 @@ export default async function ChildDashboardPage() {
 
     const { data: profile } = await supabase
         .from("profiles")
-        .select("family_id, full_name")
+        .select("role, family_id, full_name")
         .eq("id", user.id)
         .single();
 
-    if (!profile) {
-        return <div>プロフィールが見つかりません</div>;
+    if (!profile || !profile.family_id) {
+        redirect("/setup-family");
     }
 
-    // 2. 家族の名前を取得
-    const { data: familyData } = await supabase
-        .from("families")
-        .select("name")
-        .eq('id', profile.family_id)
-        .limit(1);
+    if (profile.role !== "child") {
+        redirect("/dashboard");
+    }
+
 
     const { data: familyMembers } = await supabase
         .from("profiles")

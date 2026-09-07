@@ -4,7 +4,7 @@ import { DayDial } from "./day-dial";
 interface AuthShellProps {
     eyebrow: string;
     title: string;
-    description: string;
+    description?: string;
     children: ReactNode;
     footer?: ReactNode;
 }

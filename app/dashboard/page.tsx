@@ -15,6 +15,8 @@ export default async function DashboardPage() {
         error: userError,
     } = await supabase.auth.getUser();
 
+    console.log("【デバッグ】ログインユーザーID:", user?.id);
+
     if (userError || !user) {
         redirect("/login");
     }
@@ -25,6 +27,9 @@ export default async function DashboardPage() {
         .select('*')
         .eq("id", user.id)
         .single();
+
+    console.log("【デバッグ】取得したプロフィール:", currentProfile);
+    console.log("【デバッグ】プロフィールエラー:", profileError);
 
     if (profileError || !currentProfile || !currentProfile?.family_id) {
         // まだ家族グループを作成していないユーザー向けの導線

@@ -15,9 +15,13 @@ export default async function RootPage() {
   // ログイン済みならプロフィールから役割（role）を判定
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, family_id")
     .eq("id", user.id)
     .single();
+
+  if (!profile || !profile.family_id || !profile.role) {
+    redirect("/setup-family");
+  }
 
   // 親なら親用ダッシュボード、子どもなら子ども用ダッシュボードへ
   if (profile?.role === "parent") {
@@ -26,3 +30,5 @@ export default async function RootPage() {
     redirect("/child/dashboard");
   }
 }
+
+

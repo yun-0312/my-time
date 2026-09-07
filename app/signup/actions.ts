@@ -11,6 +11,9 @@ export async function signup(formData: FormData) {
     const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+            emailRedirectTo: `${process.env.ENXT_PUBLIC_SITE_URL || "http://localhost:3000"}/setup-family`,
+        },
     });
 
     if (error) {
