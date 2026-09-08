@@ -25,7 +25,7 @@ export default async function ChildDashboardPage() {
     const { data: profile } = await supabase
         .from("profiles")
         .select("role, family_id, full_name")
-        .eq("id", user.id)
+        .eq("id", userId)
         .single();
 
     if (!profile || !profile.family_id) {
@@ -35,7 +35,6 @@ export default async function ChildDashboardPage() {
     if (profile.role !== "child") {
         redirect("/dashboard");
     }
-
 
     const { data: familyMembers } = await supabase
         .from("profiles")
@@ -50,7 +49,7 @@ export default async function ChildDashboardPage() {
         .from('schedules')
         .select('*')
         .eq('family_id', profile.family_id)
-        .or(`target_user_id.eq.${user.id},target_user_id.is.null`)
+        .or(`target_user_id.eq.${userId},target_user_id.is.null`)
         .gte('start_at', startOfTodayUTC)
         .lte('start_at', endOfTodayUTC)
         .order('start_at', { ascending: true });
@@ -60,7 +59,7 @@ export default async function ChildDashboardPage() {
         .from('tasks')
         .select('*')
         .eq('family_id', profile.family_id)
-        .or(`assigned_to.eq.${user.id},assigned_to.is.null`)
+        .or(`assigned_to.eq.${userId},assigned_to.is.null`)
         .or(`and(due_at.gte.${startOfTodayUTC},due_at.lte.${endOfTodayUTC}),and(due_at.lt.${startOfTodayUTC},is_completed.eq.false),due_at.is.null`)
         .order('due_at', { ascending: true, nullsFirst: false });
 
@@ -76,7 +75,7 @@ export default async function ChildDashboardPage() {
             requested_to_profile:profiles!requests_requested_to_fkey(full_name)
         `)
         .eq('family_id', profile.family_id)
-        .eq('requested_by', user.id)
+        .eq('requested_by', userId)
         .order('created_at', { ascending: false });
 
     const pendingRequests = myRequests?.filter((req) => req.status === "pending") || [];

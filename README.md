@@ -2,7 +2,7 @@
 
 ## 🚧 開発ステータス
 現在も継続的に機能追加やUI/UXの改善を行っている開発中のプロジェクトです。
-（今後追加・改修予定の機能：家族へのリクエスト送信機能、スケジュールのプッシュ通知など）
+（今後追加・改修予定の機能：スケジュールのプッシュ通知など）
 
 ## プロジェクトの概要
 このプロジェクトは、小学生高学年の子供が自分で時間管理が出来ることを目指し、家族間でのスケジュール調整や日々のタスク管理をスムーズに行うためのファミリー向けWebアプリケーションです。
@@ -117,14 +117,26 @@ families {
         timestamptz updated_at "更新日時"
     }
 
+    requests {
+      bigint id PK "リクエストID"
+      uuid family_id FK "ファミリーID"
+      uuid requested_by FK "リクエスト送信者ID"
+      uuid requested_to FK "リクエスト受信者ID"
+      text content "リクエスト内容"
+      text status "状態フラグ"
+      timestamptz created_at "作成日時"
+    }
+
     %% リレーション定義
     families ||--o{ profiles : "1つの家族は複数のプロフィールを持つ"
     families ||--o{ schedules : "1つの家族は複数のスケジュールを持つ"
     families ||--o{ tasks : "1つの家族は複数のタスクを持つ"
+    families ||--o{ requests : "1つの家族は複数のリクエストを持つ"
     profiles ||--o{ schedules : "ユーザーが対象のスケジュール"
     profiles ||--o{ tasks : "ユーザーが担当のタスク"
+    profiles ||--o{ requests : "ユーザーが対象のリクエスト"
 ```
-* リレーションシップ: families テーブルを基軸として profiles、schedules、tasks が紐づくマルチテナント形式に近い構造を採用しています。
+* リレーションシップ: families テーブルを基軸として profiles、schedules、tasks、requests が紐づくマルチテナント形式に近い構造を採用しています。
 
 * RLSポリシー: 各テーブルに family_id を持たせることで、同じ家族に所属するメンバーだけがデータを安全に共有・閲覧できるセキュリティ設計にしています。
 
