@@ -3,14 +3,13 @@
 import { createClient } from '@/utils/supabase/server';
 import webpush from 'web-push';
 
-// VAPIDキーの設定
-webpush.setVapidDetails(
-    'mailto:your-email@example.com',
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-    process.env.VAPID_PRIVATE_KEY!
-);
-
 export async function savePushSubscription(sub: any) {
+    // VAPIDキーの設定
+    webpush.setVapidDetails(
+        'mailto:your-email@example.com',
+        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+        process.env.VAPID_PRIVATE_KEY!
+    );
     const supabase = await createClient();
 
     const {
