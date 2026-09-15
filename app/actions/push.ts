@@ -3,13 +3,15 @@
 import { createClient } from '@/utils/supabase/server';
 import webpush from 'web-push';
 
-export async function savePushSubscription(sub: any) {
-    // VAPIDキーの設定
+if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
     webpush.setVapidDetails(
         'mailto:your-email@example.com',
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-        process.env.VAPID_PRIVATE_KEY!
+        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        process.env.VAPID_PRIVATE_KEY
     );
+}
+
+export async function savePushSubscription(sub: any) {
     const supabase = await createClient();
 
     const {
@@ -53,11 +55,10 @@ export async function savePushSubscription(sub: any) {
 }
 
 export async function sendPushNotification(userId: string, title: string, body: string) {
-    webpush.setVapidDetails(
-        'mailto:your-email@example.com',
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-        process.env.VAPID_PRIVATE_KEY!
-    );
+
+    if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+        throw new Error("VAPID keys are not configured in environment variables.");
+    }
 
     const supabase = await createClient();
 
@@ -93,7 +94,7 @@ export async function sendPushNotification(userId: string, title: string, body: 
                         .delete()
                         .eq('id', sub.id);
                 }
-                throw error;
+                throw err;
             }
         })
     );
