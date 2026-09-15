@@ -53,6 +53,12 @@ export async function savePushSubscription(sub: any) {
 }
 
 export async function sendPushNotification(userId: string, title: string, body: string) {
+    webpush.setVapidDetails(
+        'mailto:your-email@example.com',
+        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+        process.env.VAPID_PRIVATE_KEY!
+    );
+
     const supabase = await createClient();
 
     const { data: subscriptions, error } = await supabase
