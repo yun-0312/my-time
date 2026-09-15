@@ -1,4 +1,3 @@
-import React from "react";
 import { NextScheduleTimerWidget } from "@/components/next-schedule-timer-widget";
 import { TodoList } from "@/components/todo-list";
 import { ScheduleList } from "@/components/dashboard/schedule-list";
@@ -7,6 +6,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { getTodayJSTRange } from "@/utils/date";
 import { RequestHistoryList } from "@/components/request-history-list";
+import { PushNotificationSection } from "@/components/push-notification-section";
 
 export default async function ChildDashboardPage() {
     const supabase = await createClient();
@@ -80,8 +80,6 @@ export default async function ChildDashboardPage() {
 
     const pendingRequests = myRequests?.filter((req) => req.status === "pending") || [];
 
-
-
     return (
         <div className="min-h-screen bg-sky font-body text-ink">
             <div className="mx-auto max-w-5xl space-y-10 p-6 sm:p-10">
@@ -96,6 +94,8 @@ export default async function ChildDashboardPage() {
                             こんにちは、{profile.full_name}さん！
                         </h1>
                     </div>
+
+                    <PushNotificationSection currentUserId={user.id} />
 
                     {/* メインタイマー */}
                     <NextScheduleTimerWidget
