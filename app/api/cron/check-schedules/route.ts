@@ -2,21 +2,19 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js';
 import webpush from 'web-push';
 
-
-
+if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+    webpush.setVapidDetails(
+        'mailto:your-email@example.com',
+        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        process.env.VAPID_PRIVATE_KEY
+    );
+}
 
 export async function GET(request: Request) {
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        console.log("【デバッグ】Unauthorized: 認証ヘッダーが一致しません");
         return new NextResponse('Unauthorized', { status: 401 });
     }
-
-    webpush.setVapidDetails(
-        'mailto:your-email@example.com',
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-        process.env.VAPID_PRIVATE_KEY!
-    );
 
     // Supabaseから「未通知かつ時間が来たスケジュール」を検索する処理
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
