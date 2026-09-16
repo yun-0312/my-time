@@ -21,6 +21,12 @@ export async function GET(request: Request) {
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    console.log('VAPID CHECK:', {
+  hasPublic: !!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+  hasPrivate: !!process.env.VAPID_PRIVATE_KEY,
+  privateKeyLength: process.env.VAPID_PRIVATE_KEY?.length
+});
+
     const now = new Date().toISOString();
     console.log("【デバッグ】現在時刻（比較用）:", now);
 
