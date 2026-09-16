@@ -21,14 +21,7 @@ export async function GET(request: Request) {
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log('VAPID CHECK:', {
-  hasPublic: !!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-  hasPrivate: !!process.env.VAPID_PRIVATE_KEY,
-  privateKeyLength: process.env.VAPID_PRIVATE_KEY?.length
-});
-
     const now = new Date().toISOString();
-    console.log("【デバッグ】現在時刻（比較用）:", now);
 
     const { data: notifications, error } = await supabase
         .from('notifications')
@@ -37,15 +30,12 @@ export async function GET(request: Request) {
         .lte('notify_at', now);
 
     if (error || !notifications) {
-        console.error("【デバッグ】notifications取得エラー:", error);
         return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
     }
 
-    console.log(`【デバッグ】条件に合致した未通知データ数: ${notifications?.length || 0}`);
     let processedCount = 0;
 
     for (const notification of notifications || []) {
-        console.log(`【デバッグ】通知ID ${notification.id} の処理を開始します`, notification);
 
         let targetTitle = 'まもなくの予定があります';
         let scheduleTargetUserId: string | null = null;
@@ -99,7 +89,6 @@ export async function GET(request: Request) {
         }
 
         targetUserIds = Array.from(new Set(targetUserIds));
-        console.log(`【デバッグ】通知を送信する対象のユーザーIDs:`, targetUserIds);
 
         if (targetUserIds.length > 0) {
             const { data: subscriptions } = await supabase
@@ -107,7 +96,6 @@ export async function GET(request: Request) {
                 .select('*')
                 .in('user_id', targetUserIds);
 
-            console.log(`【デバッグ】取得できたプッシュ購読数: ${subscriptions?.length || 0}`);
 
             if (subscriptions && subscriptions.length > 0) {
                 const payload = JSON.stringify({
@@ -126,10 +114,8 @@ export async function GET(request: Request) {
 
                     try {
                         await webpush.sendNotification(pushSubscription, payload);
-                        console.log(`【デバッグ】プッシュ通知送信成功: endpoint = ${sub.endpoint.slice(0, 30)}...`);
                     } catch (err) {
-                        // console.error('Push send error:', err);
-                        console.error("【デバッグ】Push send error:", err);
+                        console.error('Push send error:', err);
                     }
                 }
             }
