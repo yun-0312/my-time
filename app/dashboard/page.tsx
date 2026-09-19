@@ -6,6 +6,7 @@ import { RequestListWidget } from "@/components/request-list-widget";
 import { ScheduleList } from "@/components/dashboard/schedule-list";
 import { NextScheduleTimerWidget } from "@/components/next-schedule-timer-widget";
 import { getTodayJSTRange } from "@/utils/date";
+import { PushNotificationSection } from "@/components/push-notification-section";
 
 export default async function DashboardPage() {
     const supabase = await createClient();
@@ -14,8 +15,6 @@ export default async function DashboardPage() {
         data: { user },
         error: userError,
     } = await supabase.auth.getUser();
-
-    console.log("【デバッグ】ログインユーザーID:", user?.id);
 
     if (userError || !user) {
         redirect("/login");
@@ -27,9 +26,6 @@ export default async function DashboardPage() {
         .select('*')
         .eq("id", user.id)
         .single();
-
-    console.log("【デバッグ】取得したプロフィール:", currentProfile);
-    console.log("【デバッグ】プロフィールエラー:", profileError);
 
     if (profileError || !currentProfile || !currentProfile?.family_id) {
         // まだ家族グループを作成していないユーザー向けの導線
@@ -97,6 +93,8 @@ export default async function DashboardPage() {
                     <h1 className="font-display text-3xl font-bold text-ink">
                         ダッシュボード
                     </h1>
+
+                    <PushNotificationSection currentUserId={user.id} />
 
                     <NextScheduleTimerWidget
                         familyId={familyId}
