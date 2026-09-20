@@ -27,7 +27,7 @@ export function PushNotificationButton() {
             }
 
             // 2. Service Workerを登録する
-            const registration = await navigator.serviceWorker.register('/sm.js');
+            const registration = await navigator.serviceWorker.register('/sw.js');
             await navigator.serviceWorker.ready;
 
             // 3. プッシュマネージャーからサブスクリプション（宛先）を取得する

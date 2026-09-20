@@ -28,7 +28,6 @@ export async function savePushSubscription(sub: any) {
     const p256dh = sub?.keys?.p256dh;
     const auth = sub?.keys?.auth;
 
-    console.log("安全に再構築した値 -> endpoint:", !!endpoint, "p256dh:", !!p256dh, "auth:", !!auth);
 
     if (!endpoint || !p256dh || !auth) {
         return { error: "不正なサブスクリプション情報です" };
