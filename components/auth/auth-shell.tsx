@@ -25,14 +25,16 @@ export function AuthShell({
             </div>
 
             <div className="flex flex-1 flex-col items-center justify-center gap-8 py-10">
-            <DayDial currentHour={new Date().getHours()} />
+                <DayDial currentHour={12} />
+            {/* <DayDial currentHour={new Date().getHours()} /> */}
             <p className="max-w-[22rem] text-center text-sm leading-relaxed text-ink/70">
                 あさ・まなぶ・あそぶ・やすむ。じぶんの1日を、じぶんの色でぬろう。
             </p>
             </div>
 
             <p className="text-xs text-ink/50">
-            © {new Date().getFullYear()} じぶん時間
+                © 2026 じぶん時間
+            {/* © {new Date().getFullYear()} じぶん時間 */}
             </p>
         </aside>
 
