@@ -69,7 +69,7 @@ export function PushNotificationSection({ currentUserId }: { currentUserId: stri
     };
 
     return (
-        <div className="flex flex-wrap items-center justify-center gap-4 rounded-2xl bg--white/60 p-4 shadow-sm backdrop-blur-sm">
+        <div className="flex flex-wrap items-center justify-center gap-4 rounded-2xl bg-white/60 p-4 shadow-sm backdrop-blur-sm">
             <Button
                 onClick={handleEnablePush}
                 disabled={isLoading}
