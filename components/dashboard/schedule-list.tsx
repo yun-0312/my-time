@@ -35,16 +35,6 @@ export function ScheduleList({ familyId, members, initialSchedules, currentUserI
         return new Map(members.map((m) => [m.id, m]));
     }, [members]);
 
-    const todaySchedules = useMemo(() => {
-        const todayStr = new Date().toDateString();
-
-        return schedules.filter((schedule) => {
-            if (!schedule.start_at) return false;
-            const scheduleDate = new Date(schedule.start_at).toDateString();
-            return scheduleDate === todayStr;
-        });
-    }, [schedules]);
-
     function handleDelete(scheduleId: string, e: React.MouseEvent) {
         e.stopPropagation();
         startTransition(async () => {

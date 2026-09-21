@@ -221,7 +221,7 @@ export function TodoList({ familyId, members, initialTasks, title= "タスク", 
                                         {task.title}
                                     </p>
                                     {task.description && (
-                                        <p className="text-xs text-int/60">
+                                        <p className="text-xs text-ink/60">
                                             {task.description}
                                         </p>
                                     )}

@@ -4,6 +4,7 @@ export function formatToJST(dateString: string | null) {
     const date = new Date(dateString);
 
     return new Intl.DateTimeFormat("ja-JP", {
+        timeZone: "Asia/Tokyo",
         month: "numeric",
         day: "numeric",
         weekday: "short",
