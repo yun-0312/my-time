@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { DayDial } from "./day-dial";
 
 interface AuthShellProps {
@@ -15,7 +15,15 @@ export function AuthShell({
     description,
     children,
     footer,
-    }: AuthShellProps) {
+}: AuthShellProps) {
+    const [currentYear, setCurrentYear] = useState<number | null>(null);
+    const [currentHour, setCurrentHour] = useState<number | null>(null);
+
+    useEffect(() => {
+        setCurrentYear(new Date().getFullYear());
+        setCurrentHour(new Date().getHours());
+    }, []);
+
     return (
         <div className="flex min-h-screen bg-sky font-body text-ink">
         {/* イラストパネル */}
@@ -25,16 +33,14 @@ export function AuthShell({
             </div>
 
             <div className="flex flex-1 flex-col items-center justify-center gap-8 py-10">
-                <DayDial currentHour={12} />
-            {/* <DayDial currentHour={new Date().getHours()} /> */}
-            <p className="max-w-[22rem] text-center text-sm leading-relaxed text-ink/70">
+                    <DayDial currentHour={currentHour ?? 12} />
+                <p className="max-w-[22rem] text-center text-sm leading-relaxed text-ink/70">
                 あさ・まなぶ・あそぶ・やすむ。じぶんの1日を、じぶんの色でぬろう。
             </p>
             </div>
 
             <p className="text-xs text-ink/50">
-                © 2026 じぶん時間
-            {/* © {new Date().getFullYear()} じぶん時間 */}
+            © {currentYear ?? 2026} じぶん時間
             </p>
         </aside>
 
